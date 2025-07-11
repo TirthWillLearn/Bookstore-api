@@ -31,9 +31,19 @@ app.use("/api/rating", ratingRoutes);
 app.use("/api/ai", aiRoutes);
 
 // 404 handler
-app.use((req, res) => {
-  res.status(404).json({ message: "Route not found" });
+app.use((req, res, next) => {
+  const error = new Error(`Route not found: ${req.originalUrl}`);
+  error.statusCode = 404;
+  error.details = {
+    method: req.method,
+    url: req.originalUrl,
+    timestamp: new Date().toISOString(),
+    ip: req.ip,
+    headers: req.headers,
+  };
+  next(error);
 });
+
 
 // Global error handler
 app.use((err, req, res, next) => {
