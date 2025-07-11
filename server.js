@@ -5,6 +5,8 @@ const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 
 const authRoutes = require("./routes/authRoutes.js");
+console.log("✅ authRoutes loaded:", typeof authRoutes); 
+
 const bookRoutes = require("./routes/bookRoutes.js");
 const ratingRoutes = require("./routes/ratingRoute");
 const aiRoutes = require("./routes/aiRoute");
