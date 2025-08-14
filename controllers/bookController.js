@@ -96,3 +96,23 @@ exports.addBook = async (req, res, next) => {
     next(err);
   }
 };
+
+// @route   GET /api/book/:id
+// @desc    Get a single book by its ID
+// @access  Public
+exports.getBookById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const [rows] = await db.query("SELECT * FROM books WHERE id = ?", [id]);
+
+    if (rows.length === 0) {
+      // If no book exists with the given ID, return a 404 Not Found response
+      return res.status(404).json({ message: "Book not found" });
+    }
+
+    res.status(200).json(rows[0]);
+  } catch (err) {
+    next(err);
+  }
+};
