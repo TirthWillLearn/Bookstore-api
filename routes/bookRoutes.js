@@ -4,6 +4,7 @@ const {
   addBook,
   addBookCover,
   getBooksWithPagination,
+  getBookById,
 } = require("../controllers/bookController");
 const { authMiddleware, checkRole } = require("../middleware/authMiddleware");
 const upload = require("../middleware/uploadMiddleware");
@@ -34,5 +35,12 @@ router.post("/add", authMiddleware, checkRole("admin"), addBook);
 // @route   POST /api/book/upload
 // @desc    Upload book cover image (authenticated)
 router.post("/upload", authMiddleware, upload.single("cover"), addBookCover);
+
+// GET /api/book/:id
+// Returns the details of a book by its ID.
+// Response:
+//   200: JSON object with book details
+//   404: { message: "Book not found" } if no book matches the given ID
+router.get("/:id", getBookById);
 
 module.exports = router;
