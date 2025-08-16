@@ -5,11 +5,11 @@ const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 
 const authRoutes = require("./routes/authRoutes.js");
-console.log("✅ authRoutes loaded:", typeof authRoutes); 
+console.log("✅ authRoutes loaded:", typeof authRoutes);
 
 const bookRoutes = require("./routes/bookRoutes.js");
 const ratingRoutes = require("./routes/ratingRoute");
-const aiRoutes = require("./routes/aiRoute");
+const aiRoutes = require("./experimental_features/aiRoute.js");
 
 dotenv.config();
 const app = express();
@@ -45,7 +45,6 @@ app.use((req, res, next) => {
   };
   next(error);
 });
-
 
 // Global error handler
 app.use((err, req, res, next) => {
