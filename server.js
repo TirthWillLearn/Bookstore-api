@@ -3,10 +3,9 @@ const dotenv = require("dotenv");
 const helmet = require("helmet");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
+const db = require("./config/db.js");
 
 const authRoutes = require("./routes/authRoutes.js");
-console.log("✅ authRoutes loaded:", typeof authRoutes);
-
 const bookRoutes = require("./routes/bookRoutes.js");
 const ratingRoutes = require("./routes/ratingRoute");
 const aiRoutes = require("./experimental_features/aiRoute.js");
@@ -32,6 +31,76 @@ app.use("/api/book", bookRoutes);
 app.use("/api/rating", ratingRoutes);
 app.use("/api/ai", aiRoutes);
 
+app.get("/", (req, res) => {
+  res.status(200).json({
+    service: "BookStore REST API",
+    status: "running",
+    environment: process.env.NODE_ENV || "development",
+    description:
+      "Backend API for managing books, users, ratings with authentication and role-based access",
+
+    auth: {
+      register: {
+        method: "POST",
+        path: "/api/auth/register",
+        description: "Register a new user (role defaults to user)",
+      },
+      login: {
+        method: "POST",
+        path: "/api/auth/login",
+        description: "Login and receive JWT token",
+      },
+    },
+
+    books: {
+      list: {
+        method: "GET",
+        path: "/api/book",
+        access: "Public",
+        query: ["search", "category", "page", "limit"],
+      },
+      getById: {
+        method: "GET",
+        path: "/api/book/:id",
+        access: "Public",
+      },
+      getValidated: {
+        method: "GET",
+        path: "/api/book/get",
+        access: "Authenticated",
+      },
+      add: {
+        method: "POST",
+        path: "/api/book/add",
+        access: "Admin only",
+      },
+      uploadCover: {
+        method: "POST",
+        path: "/api/book/upload",
+        access: "Authenticated",
+      },
+    },
+
+    ratings: {
+      add: {
+        method: "POST",
+        path: "/api/rating/:bookId",
+        access: "Authenticated",
+      },
+      list: {
+        method: "GET",
+        path: "/api/rating/book/:bookId",
+        access: "Public",
+      },
+    },
+
+    meta: {
+      health: "/health",
+      documentation: "See README.md on GitHub",
+    },
+  });
+});
+
 // 404 handler
 app.use((req, res, next) => {
   const error = new Error(`Route not found: ${req.originalUrl}`);
@@ -56,7 +125,17 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-});
+const PORT = process.env.DB_PORT || 5000;
+
+(async () => {
+  try {
+    await db.query("SELECT 1");
+    console.log("✅ Database reachable");
+  } catch (err) {
+    console.error("❌ Database not reachable:", err.message);
+  }
+
+  app.listen(PORT, () => {
+    console.log(`✅ Server running on port ${PORT}`);
+  });
+})();
